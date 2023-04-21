@@ -1,0 +1,57 @@
+ARG GIT_TAG=${GIT_TAG:-master}
+
+FROM alpine AS builder
+
+ARG GIT_TAG
+
+WORKDIR /build
+
+RUN apk add git
+RUN git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git
+
+#####################
+FROM python:3.10-alpine3.17 AS app
+
+COPY --from=ceramicwhite/gotty --chmod=+x /usr/bin/gotty /bin/gotty
+
+ENV PIP_NO_CACHE_DIR=yes \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    HEADLESS_BROWSER=True
+
+RUN apk update && \
+    apk add --no-cache \
+    git \
+    chromium-chromedriver \
+    wget \
+    curl \
+    unzip \
+    bash \
+    xvfb \
+    ca-certificates \
+    dbus-x11 \
+    dbus-glib \
+    gtk+3.0 \
+    gnupg \
+    build-base \
+    chromium \
+    firefox-esr && \
+    adduser -D -h /app appuser && \
+    chown appuser:appuser /app
+
+WORKDIR /app
+
+COPY --from=builder --chown=appuser:appuser /build/Auto-GPT/autogpt ./autogpt
+COPY --from=builder --chown=appuser:appuser /build/Auto-GPT/requirements.txt .
+
+USER appuser
+
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir --user -r requirements.txt && \
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.ashrc && \
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+
+EXPOSE 3000
+
+ENTRYPOINT ["gotty", "--port", "3000", "--permit-write", "--title-format", "AutoGPT Terminal"]
+CMD ["python", "-m", "autogpt"]
