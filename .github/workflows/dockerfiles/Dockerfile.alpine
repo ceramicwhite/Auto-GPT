@@ -42,7 +42,7 @@ RUN apk update && \
 WORKDIR /app
 
 COPY --from=builder --chown=appuser:appuser /build/Auto-GPT/autogpt ./autogpt
-COPY --from=builder --chown=appuser:appuser /build/Auto-GPT/requirements.txt .
+COPY --from=builder --chown=appuser:appuser /build/Auto-GPT/requirements.txt /build/Auto-GPT/LICENSE /build/Auto-GPT/README.md .
 
 USER appuser
 

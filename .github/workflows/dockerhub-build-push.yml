@@ -47,12 +47,12 @@ jobs:
           --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:latest \
           --push .
 
-      - name: Run Docker buildx for Alpine
-        run: |
-          docker buildx build \
-          --platform linux/amd64,linux/arm64 \
-          --file .github/workflows/dockerfiles/Dockerfile.alpine \
-          --build-arg GIT_TAG=${{ steps.keydb.outputs.tag_name }} \
-          --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:${{ steps.keydb.outputs.tag_name }}-alpine \
-          --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:latest-alpine \
-          --push .
+      # - name: Run Docker buildx for Alpine
+      #   run: |
+      #     docker buildx build \
+      #     --platform linux/amd64,linux/arm64 \
+      #     --file .github/workflows/dockerfiles/Dockerfile.alpine \
+      #     --build-arg GIT_TAG=${{ steps.keydb.outputs.tag_name }} \
+      #     --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:${{ steps.keydb.outputs.tag_name }}-alpine \
+      #     --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:latest-alpine \
+      #     --push .
