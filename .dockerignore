@@ -1,5 +1,8 @@
-Dockerfile*
-.dockerignore
-.env
-docker-compose.yml
-.git*
+.*
+*.template
+*.yaml
+*.yml
+
+*.md
+*.png
+!BULLETIN.md
