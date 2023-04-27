@@ -20,6 +20,11 @@ ENV PIP_NO_CACHE_DIR=yes \
     PYTHONDONTWRITEBYTECODE=1 \
     HEADLESS_BROWSER=True
 
+WORKDIR /app
+
+COPY --from=builder /build/Auto-GPT/autogpt ./autogpt
+COPY --from=builder /build/Auto-GPT/requirements.txt /build/Auto-GPT/LICENSE /build/Auto-GPT/README.md .
+
 RUN apt-get -y update && \
     apt-get -y install \
     git \
@@ -39,14 +44,8 @@ RUN apt-get -y update && \
     wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
     echo "deb [arch=$OS] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && \
-    apt-get install -y chromium firefox-esr 
-
-WORKDIR /app
-
-COPY --from=builder /build/Auto-GPT/autogpt ./autogpt
-COPY --from=builder /build/Auto-GPT/requirements.txt /build/Auto-GPT/LICENSE /build/Auto-GPT/README.md .
-
-RUN pip install --upgrade pip && \
+    apt-get install -y chromium firefox-esr && \
+    pip install --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt && \
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
