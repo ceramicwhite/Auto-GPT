@@ -27,6 +27,7 @@ RUN apt-get -y update && \
     apt-utils \
     wget \
     curl \
+    jq \
     unzip \
     gnupg2 \
     libgtk-3-0 \
@@ -38,16 +39,12 @@ RUN apt-get -y update && \
     wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
     echo "deb [arch=$OS] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && \
-    apt-get install -y chromium firefox-esr && \
-    useradd --create-home -d /app appuser && \
-    chown appuser:appuser /app
+    apt-get install -y chromium firefox-esr 
 
 WORKDIR /app
 
-COPY --from=builder --chown=appuser:appuser /build/Auto-GPT/autogpt ./autogpt
-COPY --from=builder --chown=appuser:appuser /build/Auto-GPT/requirements.txt /build/Auto-GPT/LICENSE /build/Auto-GPT/README.md .
-
-USER appuser
+COPY --from=builder /build/Auto-GPT/autogpt ./autogpt
+COPY --from=builder /build/Auto-GPT/requirements.txt /build/Auto-GPT/LICENSE /build/Auto-GPT/README.md .
 
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt && \

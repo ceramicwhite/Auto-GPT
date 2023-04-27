@@ -1,16 +1,17 @@
 ARG GIT_TAG=${GIT_TAG:-master}
 
-FROM alpine AS builder
+FROM debian:bullseye-slim AS builder
 
 ARG GIT_TAG
 
 WORKDIR /build
 
-RUN apk add git
+RUN apt-get update
+RUN apt-get install git -y
 RUN git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git
 
 #####################
-FROM python:3.10-alpine3.17 AS app
+FROM python:3.10-slim AS app
 
 COPY --from=ceramicwhite/gotty --chmod=+x /usr/bin/gotty /bin/gotty
 
@@ -19,24 +20,26 @@ ENV PIP_NO_CACHE_DIR=yes \
     PYTHONDONTWRITEBYTECODE=1 \
     HEADLESS_BROWSER=True
 
-RUN apk update && \
-    apk add --no-cache \
+RUN apt-get -y update && \
+    apt-get -y install \
     git \
-    chromium-chromedriver \
+    chromium-driver \
+    apt-utils \
     wget \
     curl \
     unzip \
-    bash \
-    xvfb \
-    ca-certificates \
+    gnupg2 \
+    libgtk-3-0 \
+    libdbus-glib-1-2 \
     dbus-x11 \
-    dbus-glib \
-    gtk+3.0 \
-    gnupg \
-    build-base \
-    chromium \
-    firefox-esr && \
-    adduser -D -h /app appuser && \
+    xvfb \
+    ca-certificates && \
+    case $(uname -m) in x86_64) OS=amd64 ;; aarch64) OS=arm64 ;; *) exit 1 ;; esac && \
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+    echo "deb [arch=$OS] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update && \
+    apt-get install -y chromium firefox-esr && \
+    useradd --create-home -d /app appuser && \
     chown appuser:appuser /app
 
 WORKDIR /app
@@ -48,7 +51,6 @@ USER appuser
 
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt && \
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.ashrc && \
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
 EXPOSE 3000
