@@ -1,17 +1,8 @@
 ARG GIT_TAG=${GIT_TAG:-master}
 
-FROM debian:bullseye-slim AS builder
+FROM python:3.10-slim AS app
 
 ARG GIT_TAG
-
-WORKDIR /build
-
-RUN apt-get update
-RUN apt-get install git -y
-RUN git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git
-
-#####################
-FROM python:3.10-slim AS app
 
 COPY --from=ceramicwhite/gotty --chmod=+x /usr/bin/gotty /bin/gotty
 
@@ -21,9 +12,6 @@ ENV PIP_NO_CACHE_DIR=yes \
     HEADLESS_BROWSER=True
 
 WORKDIR /app
-
-COPY --from=builder /build/Auto-GPT/autogpt ./autogpt
-COPY --from=builder /build/Auto-GPT/requirements.txt /build/Auto-GPT/LICENSE /build/Auto-GPT/README.md .
 
 RUN apt-get -y update && \
     apt-get -y install \
@@ -45,6 +33,7 @@ RUN apt-get -y update && \
     echo "deb [arch=$OS] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && \
     apt-get install -y chromium firefox-esr && \
+    git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
     pip install --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt && \
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc

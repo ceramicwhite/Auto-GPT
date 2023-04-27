@@ -20,6 +20,11 @@ ENV PIP_NO_CACHE_DIR=yes \
     PYTHONDONTWRITEBYTECODE=1 \
     HEADLESS_BROWSER=True
 
+WORKDIR /app
+
+COPY --from=builder /build/Auto-GPT/autogpt ./autogpt
+COPY --from=builder /build/Auto-GPT/requirements.txt /build/Auto-GPT/LICENSE /build/Auto-GPT/README.md .
+
 RUN apt-get -y update && \
     apt-get -y install \
     git \
@@ -27,6 +32,7 @@ RUN apt-get -y update && \
     apt-utils \
     wget \
     curl \
+    jq \
     unzip \
     gnupg2 \
     libgtk-3-0 \
@@ -39,17 +45,7 @@ RUN apt-get -y update && \
     echo "deb [arch=$OS] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && \
     apt-get install -y chromium firefox-esr && \
-    useradd --create-home -d /app appuser && \
-    chown appuser:appuser /app
-
-WORKDIR /app
-
-COPY --from=builder --chown=appuser:appuser /build/Auto-GPT/autogpt ./autogpt
-COPY --from=builder --chown=appuser:appuser /build/Auto-GPT/requirements.txt /build/Auto-GPT/LICENSE /build/Auto-GPT/README.md .
-
-USER appuser
-
-RUN pip install --upgrade pip && \
+    pip install --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt && \
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
