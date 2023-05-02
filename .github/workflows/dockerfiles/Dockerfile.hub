@@ -4,12 +4,14 @@ FROM python:3.10-slim AS app
 
 ARG GIT_TAG
 
-COPY --from=ceramicwhite/gotty --chmod=+x /usr/bin/gotty /bin/gotty
+COPY --from=ceramicwhite/gotty /usr/bin/gotty /bin/gotty
 
 ENV PIP_NO_CACHE_DIR=yes \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    HEADLESS_BROWSER=True
+    HEADLESS_BROWSER=True \
+    HOME=/app \
+    PATH="${PATH}:/app/.local/bin"
 
 WORKDIR /app
 
@@ -36,9 +38,9 @@ RUN apt-get -y update && \
     git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
     pip install --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt && \
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    sed -i '/self.openai_api_key = os.getenv("OPENAI_API_KEY")/i \        self.api_base = os.getenv\("OPENAI_API_BASE", "https:\/\/api.openai.com\/v1"\)' autogpt/config/config.py
 
-EXPOSE 3000
+EXPOSE 3000 7860
 
 ENTRYPOINT ["gotty", "--port", "3000", "--permit-write", "--title-format", "AutoGPT Terminal"]
 CMD ["python", "-m", "autogpt"]
