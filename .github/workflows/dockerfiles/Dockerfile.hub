@@ -38,9 +38,10 @@ RUN apt-get -y update && \
     git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
     pip install --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt && \
-    sed -i '/self.openai_api_key = os.getenv("OPENAI_API_KEY")/i \        self.api_base = os.getenv\("OPENAI_API_BASE", "https:\/\/api.openai.com\/v1"\)' autogpt/config/config.py
+    sed -i '/self.openai_api_key = os.getenv("OPENAI_API_KEY")/i \        self.api_base = os.getenv\("OPENAI_API_BASE", "https:\/\/api.openai.com\/v1"\)' autogpt/config/config.py && \
+    sed -i '/self.browse_chunk_max_length = int(os.getenv("BROWSE_CHUNK_MAX_LENGTH", 3000))/a \        self.embed_dim = int\(os.getenv\("EMBED_DIM", 1536\)\)' autogpt/config/config.py
 
-EXPOSE 3000 7860
+EXPOSE 3000
 
 ENTRYPOINT ["gotty", "--port", "3000", "--permit-write", "--title-format", "AutoGPT Terminal"]
 CMD ["python", "-m", "autogpt"]
