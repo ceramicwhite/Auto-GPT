@@ -47,12 +47,19 @@ jobs:
           --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:latest \
           --push .
           
-      - name: Run Docker buildx for Slim Edge
+      - name: Run Docker buildx for Slim master
         run: |
           docker buildx build \
           --platform linux/amd64,linux/arm64 \
           --file .github/workflows/dockerfiles/Dockerfile.hub \
           --build-arg GIT_TAG=master \
-          --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:edge \
           --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:master \
+          --push .
+          
+      - name: Run Docker buildx for master with plugins
+        run: |
+          docker buildx build \
+          --platform linux/amd64,linux/arm64 \
+          --file .github/workflows/dockerfiles/Dockerfile.plugins \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:master-with-plugins \
           --push .
