@@ -1,4 +1,6 @@
-FROM ceramicwhite/auto-gpt:master AS app
+ARG GIT_TAG=${GIT_TAG:-master}
+
+FROM ceramicwhite/auto-gpt:${GIT_TAG} AS app
 
 ENV OPENAI_API_KEY=sk-N \
     ALLOWLISTED_PLUGINS=SystemInformationPlugin \
