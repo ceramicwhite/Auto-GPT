@@ -2,9 +2,7 @@ ARG GIT_TAG=${GIT_TAG:-master}
 
 FROM ceramicwhite/auto-gpt:${GIT_TAG} AS app
 
-ENV OPENAI_API_KEY=sk-N \
-    ALLOWLISTED_PLUGINS=SystemInformationPlugin \
-    EXECUTE_LOCAL_COMMANDS=True
+ENV OPENAI_API_KEY=sk-N
 
 RUN mv .env.template .env && \
     mkdir -p plugins && \
@@ -22,4 +20,4 @@ RUN mv .env.template .env && \
     curl -L -o ./plugins/Auto-GPT-Crypto-Plugin.zip https://github.com/isaiahbjork/Auto-GPT-Crypto-Plugin/archive/refs/heads/master.zip && \
     curl -L -o ./plugins/Auto-GPT-Messages-Plugin.zip https://github.com/danikhan632/Auto-GPT-Messages-Plugin/archive/refs/heads/master.zip && \
     curl -L -o ./plugins/Auto-GPT-AlpacaTrader-Plugin.zip https://github.com/danikhan632/Auto-GPT-AlpacaTrader-Plugin/archive/refs/heads/master.zip && \
-    yes | ./run.sh --install-plugin-deps
+    python -m scripts.install_plugin_deps
