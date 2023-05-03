@@ -12,8 +12,7 @@ RUN apt-get update && \
                                       ta myfxbook gaapi4py web3 \
                                       eth-account ccxt telethon \
                                       uniswap-python && \
-    curl -L -o ./plugins/Auto-GPT-Plugins.zip https://github.com/Significant-Gravitas/Auto-GPT-Plugins/archive/refs/heads/master.zip && \
-    curl -L -o ./plugins/Auto-GPT-SystemInfo.zip https://github.com/hdkiller/Auto-GPT-SystemInfo/archive/refs/heads/master.zip && \     
+    curl -L -o ./plugins/Auto-GPT-Plugins.zip https://github.com/Significant-Gravitas/Auto-GPT-Plugins/archive/refs/heads/master.zip && \  
     curl -L -o ./plugins/Auto-GPT-Notion.zip https://github.com/doutv/Auto-GPT-Notion/archive/refs/heads/master.zip && \
     curl -L -o ./plugins/Auto-GPT-Telegram.zip https://github.com/Wladastic/Auto-GPT-Telegram-Plugin/archive/refs/heads/master.zip && \
     curl -L -o ./plugins/Auto-GPT-MetaTrader.zip https://github.com/isaiahbjork/Auto-GPT-MetaTrader-Plugin/archive/refs/heads/master.zip && \
