@@ -4,7 +4,6 @@ FROM ceramicwhite/auto-gpt:${GIT_TAG} AS app
 
 RUN apt-get update && \
     apt-get install gcc -y && \
-    mv .env.template .env && \
     mkdir -p plugins && \
     pip install --no-cache-dir --user notion-client \
                                       python-dotenv \
