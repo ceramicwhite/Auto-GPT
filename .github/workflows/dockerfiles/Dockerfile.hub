@@ -10,6 +10,7 @@ ENV PIP_NO_CACHE_DIR=yes \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     HEADLESS_BROWSER=True \
+    ALLOWLISTED_PLUGINS=SystemInformationPlugin \
     EXECUTE_LOCAL_COMMANDS=True \
     HOME=/app \
     PATH="${PATH}:/app/.local/bin"
@@ -19,6 +20,7 @@ WORKDIR /app
 RUN apt-get -y update && \
     apt-get -y install \
     git \
+    build-essential \
     chromium-driver \
     apt-utils \
     wget \
@@ -38,9 +40,12 @@ RUN apt-get -y update && \
     apt-get install -y chromium firefox-esr && \
     git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
     pip install --upgrade pip && \
-    pip install --no-cache-dir --user -r requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt && \
+    mv .env.template .env && \
     sed -i '/self.openai_api_key = os.getenv("OPENAI_API_KEY")/i \        self.api_base = os.getenv\("OPENAI_API_BASE", "https:\/\/api.openai.com\/v1"\)' autogpt/config/config.py && \
-    sed -i '/self.browse_chunk_max_length = int(os.getenv("BROWSE_CHUNK_MAX_LENGTH", 3000))/a \        self.embed_dim = int\(os.getenv\("EMBED_DIM", 1536\)\)' autogpt/config/config.py
+    sed -i '/self.browse_chunk_max_length = int(os.getenv("BROWSE_CHUNK_MAX_LENGTH", 3000))/a \        self.embed_dim = int\(os.getenv\("EMBED_DIM", 1536\)\)' autogpt/config/config.py && \
+    curl -L -o ./plugins/Auto-GPT-SystemInfo.zip https://github.com/hdkiller/Auto-GPT-SystemInfo/archive/refs/heads/master.zip && \
+    python -m scripts.install_plugin_deps
 
 EXPOSE 3000
 
