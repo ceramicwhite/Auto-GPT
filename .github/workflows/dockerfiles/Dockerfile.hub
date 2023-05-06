@@ -19,22 +19,16 @@ WORKDIR /app
 RUN apt-get -y update && \
     apt-get -y install \
     git \
-    chromium-driver \
-    apt-utils \
     wget \
     curl \
     jq \
     sudo \
     unzip \
-    gnupg2 \
-    libgtk-3-0 \
-    libdbus-glib-1-2 \
-    dbus-x11 \
-    xvfb \
-    ca-certificates \
-    chromium \
-    firefox-esr && \
-    git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
+    chromium-driver \
+    firefox-esr \
+    ca-certificates 
+
+RUN git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     sed -i '/self.openai_api_key = os.getenv("OPENAI_API_KEY")/i \        self.api_base = os.getenv\("OPENAI_API_BASE", "https:\/\/api.openai.com\/v1"\)' autogpt/config/config.py && \
