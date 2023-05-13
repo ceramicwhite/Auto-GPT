@@ -27,9 +27,8 @@ RUN apt-get -y update && \
     unzip \
     chromium-driver \
     firefox-esr \
-    ca-certificates 
-
-RUN git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
+    ca-certificates && \
+    git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     sed -i '/self.openai_api_key = os.getenv("OPENAI_API_KEY")/i \        self.api_base = os.getenv\("OPENAI_API_BASE", "https:\/\/api.openai.com\/v1"\)' autogpt/config/config.py && \
