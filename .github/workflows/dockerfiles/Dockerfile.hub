@@ -12,8 +12,7 @@ ENV PIP_NO_CACHE_DIR=yes \
     HEADLESS_BROWSER=True \
     EXECUTE_LOCAL_COMMANDS=True \
     HOME=/app \
-    PATH="${PATH}:/app/.local/bin" \
-    ALLOWLISTED_PLUGINS=SystemInformationPlugin
+    PATH="${PATH}:/app/.local/bin"
 
 WORKDIR /app
 
@@ -23,7 +22,7 @@ RUN apt-get -y update && \
     wget \
     curl \
     jq \
-    sudo \
+    sudo \ 
     unzip \
     chromium-driver \
     firefox-esr \
@@ -33,11 +32,9 @@ RUN apt-get -y update && \
     pip install --no-cache-dir -r requirements.txt && \
     sed -i '/self.openai_api_key = os.getenv("OPENAI_API_KEY")/i \        self.api_base = os.getenv\("OPENAI_API_BASE", "https:\/\/api.openai.com\/v1"\)' autogpt/config/config.py && \
     sed -i '/self.browse_chunk_max_length = int(os.getenv("BROWSE_CHUNK_MAX_LENGTH", 3000))/a \        self.embed_dim = int\(os.getenv\("EMBED_DIM", 1536\)\)' autogpt/config/config.py && \
-    touch .env && \
-    curl -L -o ./plugins/Auto-GPT-SystemInfo.zip https://github.com/hdkiller/Auto-GPT-SystemInfo/archive/refs/heads/master.zip && \ 
-    python -m scripts.install_plugin_deps
+    curl -L -o ./entrypoint.sh https://raw.githubusercontent.com/ceramicwhite/Auto-GPT/master/.github/workflows/dockerfiles/entrypoint.sh && \
+    chmod +x entrypoint.sh
 
 EXPOSE 3000
 
-ENTRYPOINT ["gotty", "--port", "3000", "--permit-write", "--title-format", "AutoGPT Terminal"]
-CMD ["python", "-m", "autogpt"]
+ENTRYPOINT ["/app/entrypoint.sh"]
