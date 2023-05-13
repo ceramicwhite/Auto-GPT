@@ -36,6 +36,16 @@ jobs:
       - name: Setup Docker buildx action
         uses: docker/setup-buildx-action@v1
         id: buildx
+
+      - name: Run Docker buildx for slim release
+        run: |
+          docker buildx build \
+          --platform linux/amd64,linux/arm64 \
+          --file .github/workflows/dockerfiles/Dockerfile.hub \
+          --build-arg GIT_TAG=${{ steps.keydb.outputs.tag_name }} \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:${{ steps.keydb.outputs.tag_name }} \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:latest \
+          --push .
           
       - name: Run Docker buildx for slim master
         run: |
@@ -46,12 +56,4 @@ jobs:
           --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:master \
           --push .
           
-      - name: Run Docker buildx for slim release
-        run: |
-          docker buildx build \
-          --platform linux/amd64,linux/arm64 \
-          --file .github/workflows/dockerfiles/Dockerfile.hub \
-          --build-arg GIT_TAG=${{ steps.keydb.outputs.tag_name }} \
-          --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:${{ steps.keydb.outputs.tag_name }} \
-          --tag ${{ secrets.DOCKERHUB_USERNAME }}/auto-gpt:latest \
-          --push .
+
