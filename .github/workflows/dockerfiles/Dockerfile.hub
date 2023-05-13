@@ -12,35 +12,30 @@ ENV PIP_NO_CACHE_DIR=yes \
     HEADLESS_BROWSER=True \
     EXECUTE_LOCAL_COMMANDS=True \
     HOME=/app \
-    PATH="${PATH}:/app/.local/bin"
+    PATH="${PATH}:/app/.local/bin" \
+    ALLOWLISTED_PLUGINS=SystemInformationPlugin
 
 WORKDIR /app
 
 RUN apt-get -y update && \
     apt-get -y install \
     git \
-    chromium-driver \
-    apt-utils \
     wget \
     curl \
     jq \
+    sudo \
     unzip \
-    gnupg2 \
-    libgtk-3-0 \
-    libdbus-glib-1-2 \
-    dbus-x11 \
-    xvfb \
+    chromium-driver \
+    firefox-esr \
     ca-certificates && \
-    case $(uname -m) in x86_64) OS=amd64 ;; aarch64) OS=arm64 ;; *) exit 1 ;; esac && \
-    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb [arch=$OS] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && \
-    apt-get install -y chromium firefox-esr && \
     git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
     pip install --upgrade pip && \
-    pip install --no-cache-dir --user -r requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt && \
     sed -i '/self.openai_api_key = os.getenv("OPENAI_API_KEY")/i \        self.api_base = os.getenv\("OPENAI_API_BASE", "https:\/\/api.openai.com\/v1"\)' autogpt/config/config.py && \
-    sed -i '/self.browse_chunk_max_length = int(os.getenv("BROWSE_CHUNK_MAX_LENGTH", 3000))/a \        self.embed_dim = int\(os.getenv\("EMBED_DIM", 1536\)\)' autogpt/config/config.py
+    sed -i '/self.browse_chunk_max_length = int(os.getenv("BROWSE_CHUNK_MAX_LENGTH", 3000))/a \        self.embed_dim = int\(os.getenv\("EMBED_DIM", 1536\)\)' autogpt/config/config.py && \
+    touch .env && \
+    curl -L -o ./plugins/Auto-GPT-SystemInfo.zip https://github.com/hdkiller/Auto-GPT-SystemInfo/archive/refs/heads/master.zip && \ 
+    python -m scripts.install_plugin_deps
 
 EXPOSE 3000
 
