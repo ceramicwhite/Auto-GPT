@@ -25,6 +25,12 @@ else
         curl -L -o ${PLUGINS_PATH}/"${PLUGIN_NAME}".zip "$FULL_URL"
     done
 
+    # Check if /app/.env exists, if not, create it
+    if [ ! -f /app/.env ]
+    then
+        touch /app/.env
+    fi
+
     # Install plugin dependencies
     python -m scripts.install_plugin_deps
 fi
