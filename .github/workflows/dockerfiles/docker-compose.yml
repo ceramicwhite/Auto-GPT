@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  auto-gpt:
+    image:  ceramicwhite/auto-gpt:latest
+    restart: on-failure
+    init: true
+    stop_grace_period: 1m
+    tty: true
+    #env_file:
+    #  - .env
+    environment:
+      - OPENAI_API_KEY=<your-open-api-key>
+      #- GPT3_ONLY=TRUE
+      ###### Redis ############
+      - MEMORY_BACKEND=redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=autogpt12345
+      - WIPE_REDIS_ON_START=False
+      - MEMORY_INDEX=auto-gpt
+      ####### Optional ##########
+      #- PLUGINS=hdkiller/Auto-GPT-SystemInfo
+      #- PLUGINS_REQS=build-essential
+      #- GOOGLE_API_KEY=<your-google-api-key>
+      #- CUSTOM_SEARCH_ENGINE_ID=<your-google-custom-search-id>
+      #- ELEVENLABS_API_KEY=<your-elevan-labs-api-key> 
+      #- ELEVENLABS_VOICE_1_ID=your-voice-id-1
+      #- OPENAI_API_BASE=http://localhost:8080/v1 # If you are using a proxy for OpenAI API or Local Model w/ https://github.com/lm-sys/FastChat/blob/main/docs/openai_api.md
+      #- EMBED_DIM=1536 #  OpenAI: 1536 (default), LLaMA 7B: 4096, LLaMA 13B: 5120, LLaMA 33B: 6656, LLaMA 65B: 8192
+    volumes:
+      - ./data/auto_gpt_workspace:/app/autogpt/auto_gpt_workspace:rw
+      - ./data/logs/auto-gpt:/app/logs:rw
+    depends_on:
+      - redis
+    ports:
+      - 3000:3000
+
+  redis:
+    container_name: redis
+    image: "redis/redis-stack-server:latest"
+    restart: on-failure
+    stop_grace_period: 5m
+    environment:
+      - REDIS_ARGS=--requirepass autogpt12345
+    volumes:
+      - ./data/redis:/data:rw
+
+networks:
+    default:
+      name: auto-gpt
