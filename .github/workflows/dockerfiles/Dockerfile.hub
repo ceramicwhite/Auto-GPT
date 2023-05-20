@@ -22,13 +22,16 @@ RUN apt-get -y update && \
     wget \
     curl \
     jq \
-    sudo \ 
+    sudo \
     unzip \
     chromium-driver \
     firefox-esr \
     ca-certificates && \
     git clone -b ${GIT_TAG} --depth 1 https://github.com/Significant-Gravitas/Auto-GPT.git . && \
-    pip install --upgrade pip && \
+    pip install --upgrade pip ; \
+    if [ "${GIT_TAG}" != "master" ]; then \
+        sed -i '/Items below this point will not be included in the Docker Image/,$d' requirements.txt; \
+    fi ; \
     pip install --no-cache-dir -r requirements.txt && \
     sed -i '/self.openai_api_key = os.getenv("OPENAI_API_KEY")/i \        self.api_base = os.getenv\("OPENAI_API_BASE", "https:\/\/api.openai.com\/v1"\)' autogpt/config/config.py && \
     sed -i '/self.browse_chunk_max_length = int(os.getenv("BROWSE_CHUNK_MAX_LENGTH", 3000))/a \        self.embed_dim = int\(os.getenv\("EMBED_DIM", 1536\)\)' autogpt/config/config.py && \
