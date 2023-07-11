@@ -62,9 +62,9 @@ COMMAND=("gotty" "--port" "3000" "--permit-write" "--title-format" "AutoGPT Term
 if [ "$GPT3_ONLY" = true ]
 then
     COMMAND+=("--gpt3only")
-    export FAST_TOKEN_LIMIT=4000
-    export SMART_TOKEN_LIMIT=4000
-    export BROWSE_CHUNK_MAX_LENGTH=3000
+    #export FAST_TOKEN_LIMIT=4000
+    #export SMART_TOKEN_LIMIT=4000
+    #export BROWSE_CHUNK_MAX_LENGTH=3000
 fi
 
 # Execute the original ENTRYPOINT with all arguments
