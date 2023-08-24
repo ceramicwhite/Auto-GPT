@@ -1,11 +1,9 @@
 import logging
-from pathlib import Path
 from typing import Any, Optional
 
 from colorama import Fore
 
 from .config import USER_FRIENDLY_OUTPUT_LOGGER, _chat_plugins
-from .handlers import JsonFileHandler
 
 
 def user_friendly_output(
@@ -13,6 +11,7 @@ def user_friendly_output(
     level: int = logging.INFO,
     title: str = "",
     title_color: str = "",
+    preserve_message_color: bool = False,
 ) -> None:
     """Outputs a message to the user in a user-friendly way.
 
@@ -26,7 +25,15 @@ def user_friendly_output(
         for plugin in _chat_plugins:
             plugin.report(f"{title}: {message}")
 
-    logger.log(level, message, extra={"title": title, "title_color": title_color})
+    logger.log(
+        level,
+        message,
+        extra={
+            "title": title,
+            "title_color": title_color,
+            "preserve_color": preserve_message_color,
+        },
+    )
 
 
 def print_attribute(
@@ -53,18 +60,8 @@ def request_user_double_check(additionalText: Optional[str] = None) -> None:
         )
 
     user_friendly_output(
-        additionalText, level=logging.WARN, title="DOUBLE CHECK CONFIGURATION"
+        additionalText,
+        level=logging.WARN,
+        title="DOUBLE CHECK CONFIGURATION",
+        preserve_message_color=True,
     )
-
-
-def log_json(data: Any, file_name: str | Path, log_dir: Path) -> None:
-    logger = logging.getLogger("JSON_LOGGER")
-
-    # Create a handler for JSON files
-    json_file_path = log_dir / file_name
-    json_data_handler = JsonFileHandler(json_file_path)
-
-    # Log the JSON data using the custom file handler
-    logger.addHandler(json_data_handler)
-    logger.debug(data)
-    logger.removeHandler(json_data_handler)

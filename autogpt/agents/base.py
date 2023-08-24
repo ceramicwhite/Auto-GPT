@@ -10,11 +10,13 @@ if TYPE_CHECKING:
     from autogpt.models.command_registry import CommandRegistry
 
 from autogpt.agents.utils.exceptions import InvalidAgentResponseError
+from autogpt.config.ai_directives import AIDirectives
 from autogpt.llm.base import ChatModelResponse, ChatSequence, Message
 from autogpt.llm.providers.openai import OPEN_AI_CHAT_MODELS, get_openai_command_specs
 from autogpt.llm.utils import count_message_tokens, create_chat_completion
 from autogpt.memory.message_history import MessageHistory
 from autogpt.models.agent_actions import ActionResult
+from autogpt.prompts.generator import PromptGenerator
 from autogpt.prompts.prompt import DEFAULT_TRIGGERING_PROMPT
 
 logger = logging.getLogger(__name__)
@@ -47,6 +49,13 @@ class BaseAgent(metaclass=ABCMeta):
         self.command_registry = command_registry
         """The registry containing all commands available to the agent."""
 
+        self.prompt_generator = PromptGenerator(
+            ai_config=ai_config,
+            ai_directives=AIDirectives.from_file(config.prompt_settings_file),
+            command_registry=command_registry,
+        )
+        """The prompt generator used for generating the system prompt."""
+
         self.config = config
         """The applicable application configuration."""
 
@@ -74,12 +83,6 @@ class BaseAgent(metaclass=ABCMeta):
         self.cycle_count = 0
         """The number of cycles that the agent has run since its initialization."""
 
-        self.system_prompt = ai_config.construct_full_prompt(config)
-        """
-        The system prompt sets up the AI's personality and explains its goals,
-        available resources, and restrictions.
-        """
-
         llm_name = self.config.smart_llm if self.big_brain else self.config.fast_llm
         self.llm = OPEN_AI_CHAT_MODELS[llm_name]
         """The LLM that the agent uses to think."""
@@ -94,6 +97,17 @@ class BaseAgent(metaclass=ABCMeta):
             self.llm,
             max_summary_tlength=summary_max_tlength or self.send_token_limit // 6,
         )
+
+        # Support multi-inheritance and mixins for subclasses
+        super(BaseAgent, self).__init__()
+
+    @property
+    def system_prompt(self) -> str:
+        """
+        The system prompt sets up the AI's personality and explains its goals,
+        available resources, and restrictions.
+        """
+        return self.prompt_generator.construct_system_prompt(self)
 
     def think(
         self,
@@ -283,7 +297,7 @@ class BaseAgent(metaclass=ABCMeta):
         return (
             f"Respond strictly with JSON{', and also specify a command to use through a function_call' if use_functions else ''}. "
             "The JSON should be compatible with the TypeScript type `Response` from the following:\n"
-            f"{response_format}\n"
+            f"{response_format}"
         )
 
     def on_before_think(

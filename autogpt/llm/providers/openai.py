@@ -169,15 +169,15 @@ def retry_api(
         warn_user bool: Whether to warn the user. Defaults to True.
     """
     error_messages = {
-        ServiceUnavailableError: f"{Fore.RED}Error: The OpenAI API engine is currently overloaded{Fore.RESET}",
-        RateLimitError: f"{Fore.RED}Error: Reached rate limit{Fore.RESET}",
+        ServiceUnavailableError: "The OpenAI API engine is currently overloaded",
+        RateLimitError: "Reached rate limit",
     }
     api_key_error_msg = (
         f"Please double check that you have setup a "
-        f"{Fore.CYAN + Style.BRIGHT}PAID{Style.RESET_ALL} OpenAI API Account. You can "
+        f"{Style.BRIGHT}PAID{Style.NORMAL} OpenAI API Account. You can "
         f"read more here: {Fore.CYAN}https://docs.agpt.co/setup/#getting-an-api-key{Fore.RESET}"
     )
-    backoff_msg = f"{Fore.RED}Waiting {{backoff}} seconds...{Fore.RESET}"
+    backoff_msg = "Waiting {backoff} seconds..."
 
     def _wrapper(func: Callable):
         @functools.wraps(func)
@@ -239,8 +239,6 @@ def create_chat_completion(
         messages=messages,
         **kwargs,
     )
-    if not hasattr(completion, "error"):
-        logger.debug(f"Response: {completion}")
     return completion
 
 

@@ -12,12 +12,6 @@ if TYPE_CHECKING:
     from autogpt.memory.vector import VectorMemory
     from autogpt.models.command_registry import CommandRegistry
 
-from autogpt.agents.utils.exceptions import (
-    AgentException,
-    CommandExecutionError,
-    InvalidAgentResponseError,
-    UnknownCommandError,
-)
 from autogpt.json_utils.utilities import extract_dict_from_response, validate_dict
 from autogpt.llm.api_manager import ApiManager
 from autogpt.llm.base import Message
@@ -37,14 +31,21 @@ from autogpt.models.agent_actions import (
 )
 from autogpt.models.command import CommandOutput
 from autogpt.models.context_item import ContextItem
-from autogpt.workspace import Workspace
 
 from .base import BaseAgent
+from .features.context import ContextMixin
+from .features.workspace import WorkspaceMixin
+from .utils.exceptions import (
+    AgentException,
+    CommandExecutionError,
+    InvalidAgentResponseError,
+    UnknownCommandError,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class Agent(BaseAgent):
+class Agent(ContextMixin, WorkspaceMixin, BaseAgent):
     """Agent class for interacting with Auto-GPT."""
 
     def __init__(
@@ -66,9 +67,6 @@ class Agent(BaseAgent):
 
         self.memory = memory
         """VectorMemoryProvider used to manage the agent's context (TODO)"""
-
-        self.workspace = Workspace(config.workspace_path, config.restrict_to_workspace)
-        """Workspace that the agent has access to, e.g. for reading/writing files."""
 
         self.created_at = datetime.now().strftime("%Y%m%d_%H%M%S")
         """Timestamp the agent was created; only used for structured debug logging."""
@@ -179,14 +177,11 @@ class Agent(BaseAgent):
                     return_value[1], ContextItem
                 ):
                     context_item = return_value[1]
-                    # return_value = return_value[0]
+                    return_value = return_value[0]
                     logger.debug(
                         f"Command {command_name} returned a ContextItem: {context_item}"
                     )
-                    # self.context.add(context_item)
-
-                    # HACK: use content of ContextItem as return value, for legacy support
-                    return_value = context_item.content
+                    self.context.add(context_item)
 
                 result = ActionSuccessResult(return_value)
             except AgentException as e:
@@ -352,7 +347,7 @@ def execute_command(
             raise CommandExecutionError(str(e))
 
     # Handle non-native commands (e.g. from plugins)
-    for command in agent.ai_config.prompt_generator.commands:
+    for command in agent.prompt_generator.commands:
         if (
             command_name == command.label.lower()
             or command_name == command.name.lower()
